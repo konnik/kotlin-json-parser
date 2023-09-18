@@ -26,11 +26,11 @@ sealed interface JsonValue {
  */
 fun parseJson(input: String): JsonValue? =
     when (val result = json(input)) {
-            null -> null
-            else -> when (result.second) {
-                "" -> result.first
-                else -> null // it's an error if not all input is consumed
-            }
+        null -> null
+        else -> when (result.second) {
+            "" -> result.first
+            else -> null // it's an error if not all input is consumed
+        }
     }
 
 
@@ -42,13 +42,11 @@ fun parseJson(input: String): JsonValue? =
  */
 
 /**
- * Data type representing a parser that parses a some input string and produces
- * a value of type A.
+ * Type that defines what a parser is.
  *
- * If the parser succeeds the parsed value is returned together with the remainder of the input
- * that has not been consumed.
- *
- * If the parser fails null is returned.
+ * A parser is a function that takes some input (String) as it's argument and
+ * if it succeeds returns a value of type A (together with de remaining input),
+ * otherwise it returns null.
  *
  */
 private typealias Parser<A> = (String) -> Pair<A, String>?
@@ -56,7 +54,7 @@ private typealias Parser<A> = (String) -> Pair<A, String>?
 
 /* ----------------------------------------------------------------------------
  *
- * COMBINATORS
+ * COMBINATOR FUNCTIONS
  *
  * ----------------------------------------------------------------------------
  */
@@ -129,7 +127,7 @@ private fun <A : Any> lazy(parser: () -> Parser<A>): Parser<A> = { input ->
  * Combine to parsers into one that concatenates the results of the
  * individual parsers into one string.
  */
-private operator fun <A: Any, B: Any>Parser<A>.plus(parserB: Parser<B>): Parser<String> =
+private operator fun <A : Any, B : Any> Parser<A>.plus(parserB: Parser<B>): Parser<String> =
     this.andThen { valueA -> parserB.map { valueB -> valueA.toString() + valueB.toString() } }
 
 
@@ -161,7 +159,6 @@ private fun match(test: (Char) -> Boolean): Parser<Char> = { input ->
         }
     }
 }
-
 
 
 /* ------------------------------------------------------------------------------------------
