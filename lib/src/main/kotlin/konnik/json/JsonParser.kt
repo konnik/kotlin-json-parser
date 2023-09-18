@@ -1,5 +1,12 @@
 package konnik.json
 
+/* ----------------------------------------------------------------------------
+ *
+ * PUBLIC INTERFACE
+ *
+ * ----------------------------------------------------------------------------
+ */
+
 /**
  * Algebraic Data Type representing a parsed JSON-value.
  */
@@ -27,7 +34,138 @@ fun parseJson(input: String): JsonValue? =
     }
 
 
-/*
+/* ----------------------------------------------------------------------------
+ *
+ * IMPLEMENTATION
+ *
+ * ----------------------------------------------------------------------------
+ */
+
+/**
+ * Data type representing a parser that parses a some input string and produces
+ * a value of type A.
+ *
+ * If the parser succeeds the parsed value is returned together with the remainder of the input
+ * that has not been consumed.
+ *
+ * If the parser fails null is returned.
+ *
+ */
+private typealias Parser<A> = (String) -> Pair<A, String>?
+
+
+/* ----------------------------------------------------------------------------
+ *
+ * COMBINATORS
+ *
+ * ----------------------------------------------------------------------------
+ */
+
+/**
+ * Transforms the value of a successful parse to another value.
+ *
+ * Fun fact: this means that Parser is a Functor and corresponds to fmap in Haskell.
+ */
+private fun <A : Any, B : Any> Parser<A>.map(transform: (A) -> B): Parser<B> = { input ->
+    this(input)?.let { transform(it.first) to it.second }
+}
+
+/**
+ * A parser that always succeeds with the provided value without consuming any input.
+ *
+ * Fun fact: this corresponds to pure (from type class Applicative) in Haskell.
+ */
+
+private fun <T : Any> succeed(value: T): Parser<T> = { input -> value to input }
+
+/**
+ * Chain two parsers together where the second parser depends on the produced value
+ * if the first.
+ *
+ * This function is often called flatMap, but I think andThen is a more intuitive name. It's
+ * also the name used in the Elm, the best programming language ever created so let's go with that.
+ *
+ * Fun fact: This is bind / >>= in Haskell and makes our Parser a Monad.
+ */
+private fun <A : Any, B : Any> Parser<A>.andThen(aToParserB: (A) -> Parser<B>): Parser<B> = { input ->
+    this(input)?.let { a -> aToParserB(a.first)(a.second) }
+}
+
+/**
+ * Chain two parsers together but keep only the value from de second parser.
+ *
+ * Fun fact: This is Applicative *> (or Monad >>) in Haskell
+ */
+private fun <A : Any, B : Any> Parser<A>.keep(parserB: Parser<B>): Parser<B> =
+    this.andThen { parserB }
+
+
+/**
+ * Chain two parsers together but keep only the value from de first parser.
+ *
+ * Fun fact: This is Applicative <* in Haskell
+ */
+private fun <A : Any, B : Any> Parser<A>.skip(parserB: Parser<B>): Parser<A> =
+    this.andThen { a -> parserB.map { a } }
+
+/**
+ * Combine multiple parsers into a parser that returns the value of the first
+ * parser that succeeds.
+ */
+private fun <A : Any> oneOf(vararg parsers: Parser<A>): Parser<A> = { input ->
+    parsers.firstNotNullOfOrNull { it(input) }
+}
+
+/**
+ * Make the construction of a parser lazy. This is sometimes useful for
+ * preventing stack overflows when defining parsers recursively.
+ */
+private fun <A : Any> lazy(parser: () -> Parser<A>): Parser<A> = { input ->
+    parser()(input)
+}
+
+/**
+ * Combine to parsers into one that concatenates the string results of the
+ * individual parsers into one string.
+ */
+private operator fun Parser<String>.plus(parserB: Parser<String>): Parser<String> =
+    this.andThen { valueA -> parserB.map { valueB -> valueA + valueB } }
+
+
+/* ----------------------------------------------------------------------------
+ *
+ * PRIMITIVE PARSERS
+ *
+ * ----------------------------------------------------------------------------
+ */
+
+/**
+ * Exact match of a string literal.
+ */
+private fun s(str: String): Parser<String> = { input ->
+    when {
+        input.startsWith(str) -> str to input.drop(str.length)
+        else -> null
+    }
+}
+
+/**
+ * Match a character using the provided predicate.
+ */
+private fun match(test: (Char) -> Boolean): Parser<Char> = { input ->
+    input.firstOrNull()?.let {
+        when {
+            test(it) -> input.first() to input.drop(1)
+            else -> null
+        }
+    }
+}
+
+
+
+/* ------------------------------------------------------------------------------------------
+ * GRAMMAR
+ *
  * Implementation of the grammar from https://www.json.org/json-en.html follows.
  *
  * The parsers defined below are given names that follows the grammar but due to Kotlin
@@ -38,6 +176,7 @@ fun parseJson(input: String): JsonValue? =
  *
  * To be able to define some recursive parsers a "lazy" variant of some parsers was needed,
  * in the form of a function that lazily returns the corresponding parser.
+ * ------------------------------------------------------------------------------------------
  */
 
 
