@@ -64,7 +64,7 @@ private typealias Parser<A> = (String) -> Pair<A, String>?
 /**
  * Transforms the value of a successful parse to another value.
  *
- * Fun fact: this means that Parser is a Functor and corresponds to fmap in Haskell.
+ * Fun fact: this means that our Parser type is a Functor and corresponds to fmap in Haskell.
  */
 private fun <A : Any, B : Any> Parser<A>.map(transform: (A) -> B): Parser<B> = { input ->
     this(input)?.let { transform(it.first) to it.second }
@@ -80,12 +80,13 @@ private fun <T : Any> succeed(value: T): Parser<T> = { input -> value to input }
 
 /**
  * Chain two parsers together where the second parser depends on the produced value
- * if the first.
+ * if the first. This means that the first parser must succeed before the second parser can
+ * proceed.
  *
  * This function is often called flatMap, but I think andThen is a more intuitive name. It's
- * also the name used in the Elm, the best programming language ever created so let's go with that.
+ * also the name used in the Elm, the best programming language ever created, so let's go with that.
  *
- * Fun fact: This is bind / >>= in Haskell and makes our Parser a Monad.
+ * Fun fact: This is bind / >>= in Haskell and makes our Parser type a Monad.
  */
 private fun <A : Any, B : Any> Parser<A>.andThen(aToParserB: (A) -> Parser<B>): Parser<B> = { input ->
     this(input)?.let { a -> aToParserB(a.first)(a.second) }
@@ -125,11 +126,11 @@ private fun <A : Any> lazy(parser: () -> Parser<A>): Parser<A> = { input ->
 }
 
 /**
- * Combine to parsers into one that concatenates the string results of the
+ * Combine to parsers into one that concatenates the results of the
  * individual parsers into one string.
  */
-private operator fun Parser<String>.plus(parserB: Parser<String>): Parser<String> =
-    this.andThen { valueA -> parserB.map { valueB -> valueA + valueB } }
+private operator fun <A: Any, B: Any>Parser<A>.plus(parserB: Parser<B>): Parser<String> =
+    this.andThen { valueA -> parserB.map { valueB -> valueA.toString() + valueB.toString() } }
 
 
 /* ----------------------------------------------------------------------------
