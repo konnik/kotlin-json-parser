@@ -18,7 +18,7 @@ sealed interface JsonValue {
  * @return json value or null if parsing fails
  */
 fun parseJson(input: String): JsonValue? =
-    when (val result = jsonParser(input)) {
+    when (val result = json(input)) {
             null -> null
             else -> when (result.second) {
                 "" -> result.first
@@ -27,11 +27,24 @@ fun parseJson(input: String): JsonValue? =
     }
 
 
+/*
+ * Implementation of the grammar from https://www.json.org/json-en.html follows.
+ *
+ * The parsers defined below are given names that follows the grammar but due to Kotlin
+ * initialization orders the ordering are not the same.
+ *
+ * The parsers are declared as toplevel val's to minimize noise on the use site. This makes
+ * the parser very readable, and it almost reads as the official grammar.
+ *
+ * To be able to define some recursive parsers a "lazy" variant of some parsers was needed,
+ * in the form of a function that lazily returns the corresponding parser.
+ */
+
 
 /**
  * Consumes zero or more whitespace characters.
  */
-val ws: Parser<String> = oneOf(
+private val ws: Parser<String> = oneOf(
     s("\u0020") + _ws(),
     s("\u000A") + _ws(),
     s("\u000D") + _ws(),
@@ -39,19 +52,19 @@ val ws: Parser<String> = oneOf(
     succeed("")
 )
 
-fun _ws(): Parser<String> = lazy { ws }
+private fun _ws(): Parser<String> = lazy { ws }
 
 
 /**
  * Matches a single digit 1 to 9.
  */
-val onenine: Parser<String> =
+private val onenine: Parser<String> =
     match { it in '1'..'9' }.map { it.toString() }
 
 /**
  * Matches a single digit 0 to 9.
  */
-val digit: Parser<String> = oneOf(
+private val digit: Parser<String> = oneOf(
     s("0"),
     onenine
 )
@@ -59,18 +72,18 @@ val digit: Parser<String> = oneOf(
 /**
  * Matches one or more digits.
  */
-val digits: Parser<String> = oneOf(
+private val digits: Parser<String> = oneOf(
     digit + _digits(),
     digit
 )
 
-fun _digits() = lazy { digits }
+private fun _digits() = lazy { digits }
 
 
 /**
  * Parse an integer that can start with a minus sign.
  */
-val integer: Parser<String> = oneOf(
+private val integer: Parser<String> = oneOf(
     onenine + digits,
     digit,
     s("-") + onenine + digits,
@@ -83,7 +96,7 @@ val integer: Parser<String> = oneOf(
  *
  * If no fraction is found an empty string is produced.
  */
-val fraction: Parser<String> = oneOf(
+private val fraction: Parser<String> = oneOf(
     s(".") + digits,
     succeed("")
 )
@@ -91,7 +104,7 @@ val fraction: Parser<String> = oneOf(
 /**
  * Parse an optional sign. If no sign is found the empty string is produced.
  */
-val sign: Parser<String> = oneOf(
+private val sign: Parser<String> = oneOf(
     s("+"),
     s("-"),
     succeed("")
@@ -100,7 +113,7 @@ val sign: Parser<String> = oneOf(
 /**
  * Parse an optional exponent. If no exponent is found the empty string is produced.
  */
-val exponent: Parser<String> = oneOf(
+private val exponent: Parser<String> = oneOf(
     s("E") + sign + digits,
     s("e") + sign + digits,
     succeed("")
@@ -110,14 +123,14 @@ val exponent: Parser<String> = oneOf(
 /**
  * Parse a JSON number.
  */
-val number: Parser<String> =
+private val number: Parser<String> =
     integer + fraction + exponent
 
 
 /**
  * Parse one hex digit (both lower and upper case allowed)
  */
-val hex: Parser<String> = oneOf(
+private val hex: Parser<String> = oneOf(
     digit,
     match { it in 'A'..'F' }.map { it.toString() },
     match { it in 'a'..'f' }.map { it.toString() },
@@ -127,7 +140,7 @@ val hex: Parser<String> = oneOf(
  * Parse an escaped value in a JSON string, i.e. a sequence
  * of characters following a backslash (\).
  */
-val escape: Parser<String> = oneOf(
+private val escape: Parser<String> = oneOf(
     s("\"").map { "\"" },
     s("\\").map { "\\" },
     s("/").map { "/" },
@@ -144,7 +157,7 @@ val escape: Parser<String> = oneOf(
 /**
  * Parse one character in a JSON string. The character can be escaped by a backslash (\).
  */
-val character: Parser<String> = oneOf(
+private val character: Parser<String> = oneOf(
     match { it >= '\u0020' && it != '\"' && it != '\\' }.map { it.toString() },  // "
     s("\\").keep(escape)
 )
@@ -152,30 +165,30 @@ val character: Parser<String> = oneOf(
 /**
  * Parse zero or more valid characters in a JSON string.
  */
-val characters: Parser<String> = oneOf(
+private val characters: Parser<String> = oneOf(
     character + _characters(),
     succeed("")
 )
 
-fun _characters() = lazy { characters }
+private fun _characters() = lazy { characters }
 
 
 /**
  * Parse a JSON string.
  */
-val string: Parser<String> =
+private val string: Parser<String> =
     s("\"").keep(characters).skip(s("\""))
 
 /**
  * Parse an element. An element is a json value surrounded by whitespace.
  */
-val element: Parser<JsonValue> =
+private val element: Parser<JsonValue> =
     ws.keep(_jsonValue()).skip(ws)
 
 /**
  * Parse one or more elements separated by comma (,).
  */
-val elements: Parser<List<JsonValue>> = oneOf(
+private val elements: Parser<List<JsonValue>> = oneOf(
     element.skip(s(",")).andThen { first ->
         _elements().map { rest ->
             listOf(first) + rest
@@ -184,12 +197,12 @@ val elements: Parser<List<JsonValue>> = oneOf(
     element.map { listOf(it) },
 )
 
-fun _elements(): Parser<List<JsonValue>> = lazy { elements }
+private fun _elements(): Parser<List<JsonValue>> = lazy { elements }
 
 /**
  * Parse one member. A member is one key-value pair in a JSON object.
  */
-val member: Parser<Pair<String, JsonValue>> =
+private val member: Parser<Pair<String, JsonValue>> =
     ws.keep(string).skip(ws).skip(s(":")).andThen { key ->
         element.map { value ->
             key to value
@@ -199,7 +212,7 @@ val member: Parser<Pair<String, JsonValue>> =
 /**
  * Parse one or more members separated by a comma (,).
  */
-val members: Parser<List<Pair<String, JsonValue>>> = oneOf(
+private val members: Parser<List<Pair<String, JsonValue>>> = oneOf(
     member.skip(s(",")).andThen { first ->
         _members().map { rest ->
             listOf(first) + rest
@@ -208,13 +221,13 @@ val members: Parser<List<Pair<String, JsonValue>>> = oneOf(
     member.map { listOf(it) }
 )
 
-fun _members(): Parser<List<Pair<String, JsonValue>>> = members
+private fun _members(): Parser<List<Pair<String, JsonValue>>> = members
 
 
 /**
  * Parse a JSON boolean.
  */
-val jsBool: Parser<JsonValue> = oneOf(
+private val jsBool: Parser<JsonValue> = oneOf(
     s("true").map { JsonValue.Bool(true) },
     s("false").map { JsonValue.Bool(false) }
 )
@@ -222,26 +235,26 @@ val jsBool: Parser<JsonValue> = oneOf(
 /**
  * Parse a JSON null.
  */
-val jsNull: Parser<JsonValue> =
+private val jsNull: Parser<JsonValue> =
     s("null").map { JsonValue.Null }
 
 
 /**
  * Parse a JSON number.
  */
-val jsNum: Parser<JsonValue> =
+private val jsNum: Parser<JsonValue> =
     number.map { JsonValue.Num(it.toDouble()) }
 
 /**
  * Parse a JSON string.
  */
-val jsString: Parser<JsonValue> =
+private val jsString: Parser<JsonValue> =
     string.map { JsonValue.Str(it) }
 
 /**
  * Parse a JSON array.
  */
-val jsArray: Parser<JsonValue> = oneOf(
+private val jsArray: Parser<JsonValue> = oneOf(
     s("[").andThen { ws }.andThen { s("]") }.map { JsonValue.Array(emptyList<JsonValue>()) },
     s("[").keep(_elements()).skip(s("]")).map { JsonValue.Array(it) },
 )
@@ -250,7 +263,7 @@ val jsArray: Parser<JsonValue> = oneOf(
 /**
  * Parse a JSON object.
  */
-val jsObject: Parser<JsonValue> = oneOf(
+private val jsObject: Parser<JsonValue> = oneOf(
     s("{").keep(members).skip(s("}")).map { JsonValue.Object(it.toMap()) },
     s("{").skip(ws).keep(s("}")).map { JsonValue.Object(emptyMap()) },
 )
@@ -258,7 +271,7 @@ val jsObject: Parser<JsonValue> = oneOf(
 /**
  * Parse a JSON value.
  */
-val jsonValue: Parser<JsonValue> = oneOf(
+private val jsonValue: Parser<JsonValue> = oneOf(
     jsNull,
     jsBool,
     jsString,
@@ -267,7 +280,7 @@ val jsonValue: Parser<JsonValue> = oneOf(
     jsObject
 )
 
-fun _jsonValue() = lazy { jsonValue }
+private fun _jsonValue() = lazy { jsonValue }
 
 
-val jsonParser: Parser<JsonValue> = element
+private val json: Parser<JsonValue> = element
