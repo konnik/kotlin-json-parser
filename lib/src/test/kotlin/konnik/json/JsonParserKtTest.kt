@@ -63,8 +63,9 @@ class JsonParserKtTest {
     }
 
     @Test
-    fun `strings - invalid`() {
-        assertEquals(null, parseJson(""""string with unescaped " quote""""))
+    fun `strings - invalid ones`() {
+        assertEquals(null, parseJson(""""string containing " an unescaped quote""""))
+        assertEquals(null, parseJson(""""string without end quote"""))
     }
 
     @Test
