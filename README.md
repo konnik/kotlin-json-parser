@@ -18,8 +18,7 @@ toy project after all...
 The source is in a single file and under 200 lines (not counting comments and blanks)
 and can easily be copied into your own project if you want to use it.
 
-Feel free to use it if you like. Suggestions welcome if you think something can be
-done in a better way.
+Suggestions welcome if you think something can be done in a better way.
 
 Happy hacking!
 
