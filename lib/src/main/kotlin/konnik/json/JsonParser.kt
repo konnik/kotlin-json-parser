@@ -172,8 +172,12 @@ private fun match(test: (Char) -> Boolean): Parser<Char> = { input ->
  * The parsers are declared as toplevel val's to minimize noise on the use site. This makes
  * the parser very readable, and it almost reads as the official grammar.
  *
- * To be able to define some recursive parsers a "lazy" variant of some parsers was needed,
- * in the form of a function that lazily returns the corresponding parser.
+ * To be able to define some recursive parsers a lazy variant of some parsers was needed.
+ * This was solved by defining a corresponding function, for example:
+ *
+ * fun _ws() = lazy { ws }
+ *
+ * If there are better ways to do this I'm eager to hear.
  * ------------------------------------------------------------------------------------------
  */
 
