@@ -222,14 +222,30 @@ private fun _digits() = lazy { digits }
 
 
 /**
+ * Parses a single minus sign.
+ */
+val minus = s("-")
+
+/**
+ * Parses a single plus sign.
+ */
+val plus = s("+")
+
+/**
+ * Parses a single dot
+ */
+val dot = s(".")
+
+/**
  * Parse an integer that can start with a minus sign.
  */
 private val integer: Parser<String> = oneOf(
     onenine + digits,
     digit,
-    s("-") + onenine + digits,
-    s("-") + digit,
+    minus + onenine + digits,
+    minus + digit,
 )
+
 
 /**
  * Parse an optional fraction. A fraction starts with a dot (.)
@@ -238,16 +254,17 @@ private val integer: Parser<String> = oneOf(
  * If no fraction is found an empty string is produced.
  */
 private val fraction: Parser<String> = oneOf(
-    s(".") + digits,
+    dot + digits,
     succeed("")
 )
+
 
 /**
  * Parse an optional sign. If no sign is found the empty string is produced.
  */
 private val sign: Parser<String> = oneOf(
-    s("+"),
-    s("-"),
+    plus,
+    minus,
     succeed("")
 )
 
