@@ -9,7 +9,7 @@ to [functional parsing](https://www.youtube.com/watch?v=dDtZLm7HIJs) on YouTube.
 My main goal was to build a fp-style recursive descent parser exploring
 Kotlin's support for functional programming techniques and I do like
 how it turned out. I think the code is pretty readable and the different parsers for the
-grammar reads almost exactly as the corresponding grammar rules on https://www.json.org/.
+grammar reads almost exactly as the corresponding grammar rules on [www.json.org](https://www.json.org/).
 
 Note that I have not made any effort on making it perform well
 and I haven't benchmarked it at all. It's probably pretty slow, it's just a
