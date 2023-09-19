@@ -228,7 +228,7 @@ private val integer: Parser<String> = oneOf(
     onenine + digits,
     digit,
     s("-") + onenine + digits,
-    s("-") + digits,
+    s("-") + digit,
 )
 
 /**

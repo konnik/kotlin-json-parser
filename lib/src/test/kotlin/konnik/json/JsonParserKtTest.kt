@@ -43,7 +43,8 @@ class JsonParserKtTest {
 
     @Test
     fun `numbers - invalid ones`() {
-        assertEquals(null, parseJson("0123")) // cant start with 0
+        assertEquals(null, parseJson("0123")) // cant start with 0 if more than one digit
+        assertEquals(null, parseJson("-0123")) // negative numbers with more than on digit can't start with 0
         assertEquals(null, parseJson(".123")) // must have number before decimal point
         assertEquals(null, parseJson("+12")) // positive numbers does not use prefix +
     }
