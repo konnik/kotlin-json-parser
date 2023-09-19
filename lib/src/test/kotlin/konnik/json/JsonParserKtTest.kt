@@ -33,6 +33,10 @@ class JsonParserKtTest {
         assertEquals(JsonValue.Num(314.0), parseJson("3.14e+2"))
         assertEquals(JsonValue.Num(0.00314), parseJson("3.14E-3"))
         assertEquals(JsonValue.Num(0.00314), parseJson("3.14e-3"))
+        assertEquals(JsonValue.Num(3000.0), parseJson("3E3"))
+        assertEquals(JsonValue.Num(0.042), parseJson("42e-3"))
+        assertEquals(JsonValue.Num(0.0), parseJson("0E3"))
+        assertEquals(JsonValue.Num(-0.0), parseJson("-0e-3"))
         assertEquals(JsonValue.Num(123.0), parseJson("123"))
         assertEquals(JsonValue.Num(1.0), parseJson("1"))
         assertEquals(JsonValue.Num(0.0), parseJson("0"))
@@ -46,6 +50,7 @@ class JsonParserKtTest {
         assertEquals(null, parseJson("0123")) // cant start with 0 if more than one digit
         assertEquals(null, parseJson("-0123")) // negative numbers with more than on digit can't start with 0
         assertEquals(null, parseJson(".123")) // must have number before decimal point
+        assertEquals(null, parseJson("02.123")) // cant start with 0 if integer part is more than one digit
         assertEquals(null, parseJson("+12")) // positive numbers does not use prefix +
     }
 
