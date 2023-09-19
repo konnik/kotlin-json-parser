@@ -440,5 +440,7 @@ private val jsonValue: Parser<JsonValue> = oneOf(
 
 private fun _jsonValue() = lazy { jsonValue }
 
-
+/**
+ * The main JSON parser corresponding to the top level rule in the grammar.
+ */
 private val json: Parser<JsonValue> = element
