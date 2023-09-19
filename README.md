@@ -20,5 +20,5 @@ and can easily be copied into your own project if you want to use it.
 
 Suggestions welcome if you think something can be done in a better way.
 
-Happy hacking!
+Happy parsing!
 
