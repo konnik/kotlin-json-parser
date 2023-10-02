@@ -124,7 +124,7 @@ private fun <A : Any> lazy(parser: () -> Parser<A>): Parser<A> = { input ->
 }
 
 /**
- * Combine to parsers into one that concatenates the results of the
+ * Combine two parsers into one that concatenates the results of the
  * individual parsers into one string.
  */
 private operator fun <A : Any, B : Any> Parser<A>.plus(parserB: Parser<B>): Parser<String> =
