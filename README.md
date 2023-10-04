@@ -20,5 +20,8 @@ and can easily be copied into your own project if you want to use it.
 
 Suggestions are welcome if you think something can be done in a better way.
 
+Please also checkout my other JSON parsers written in [Haskell](https://github.com/konnik/haskell-json-parser/) 
+and [Clojure](https://github.com/konnik/clojure-json-parser/).
+
 Happy parsing!
 
