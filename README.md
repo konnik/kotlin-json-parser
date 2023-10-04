@@ -1,4 +1,4 @@
-# Kotlin JSON Parser (from scratch)
+# Kotlin JSON parser (from scratch)
 
 [![Java CI with Gradle](https://github.com/konnik/kotlin-json-parser/actions/workflows/gradle.yml/badge.svg)](https://github.com/konnik/kotlin-json-parser/actions/workflows/gradle.yml)
 
