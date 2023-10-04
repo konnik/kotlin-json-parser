@@ -1,4 +1,4 @@
-# Kotlin JSON Parser
+# Kotlin JSON Parser (from scratch)
 
 [![Java CI with Gradle](https://github.com/konnik/kotlin-json-parser/actions/workflows/gradle.yml/badge.svg)](https://github.com/konnik/kotlin-json-parser/actions/workflows/gradle.yml)
 
@@ -18,7 +18,7 @@ toy project after all...
 The source is in a single file and under 200 lines (not counting comments and blanks)
 and can easily be copied into your own project if you want to use it.
 
-Suggestions welcome if you think something can be done in a better way.
+Suggestions are welcome if you think something can be done in a better way.
 
 Happy parsing!
 
