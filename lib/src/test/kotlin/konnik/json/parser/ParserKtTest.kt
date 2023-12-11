@@ -3,6 +3,8 @@
  */
 package konnik.json.parser
 
+import konnik.json.decode.*
+import konnik.json.result.Ok
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -142,6 +144,56 @@ class ParserKtTest {
         assertEquals(null, parseJson("falsetrue"))
         assertEquals(null, parseJson("nullfalse"))
         assertEquals(null, parseJson("42.2false"))
+    }
+
+    @Test
+    fun `decodeJson - parse and decode`() {
+        val registeredJson = """
+            { "type": "registered", 
+              "id": 42,
+              "alias": "mrsmith",
+              "email": "mrsmith@example.com",
+              "phone": null
+            }
+        """.trimIndent()
+
+        val guestJson = """
+            { "type": "guest", 
+              "displayName":"Guest123"
+            }
+        """.trimIndent()
+
+        val userDecoder: Decoder<User> =
+            field("type", str).andThen { type ->
+                when (type) {
+                    "guest" -> map(
+                        field("displayName", str),
+                        User::Guest
+                    )
+
+                    "registered" -> map4(
+                        field("id", int),
+                        field("alias", str),
+                        field("email", str),
+                        field("phone", nullable(str)),
+                        User::Registered
+                    )
+
+                    else -> fail("Invalid type: $type")
+                }
+            }
+
+        val guest = decodeJson(guestJson, userDecoder)
+        val registered = decodeJson(registeredJson, userDecoder)
+
+        assertEquals(Ok(User.Guest("Guest123")), guest)
+        assertEquals(Ok(User.Registered(42, "mrsmith", "mrsmith@example.com", null)), registered)
+
+    }
+
+    sealed interface User {
+        data class Guest(val displayName: String) : User
+        data class Registered(val id: Int, val alias: String, val email: String, val phone: String?) : User
     }
 
 

@@ -188,6 +188,14 @@ fun <A, B> Decoder<A>.map(transform: (A) -> B): Decoder<B> = { jsonValue ->
 }
 
 /**
+ * Maps a decoded value using the provided [transform] function.
+ */
+@JvmName("mapDecoderAsParam")
+fun <A, B> map(decoder: Decoder<A>, transform: (A) -> B): Decoder<B> = { jsonValue ->
+    decoder(jsonValue).map(transform)
+}
+
+/**
  * Combine the results of two decoders using the provided function.
  */
 fun <A, B, R> map2(a: Decoder<A>, b: Decoder<B>, transform: (A, B) -> R): Decoder<R> =

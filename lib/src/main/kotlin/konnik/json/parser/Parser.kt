@@ -1,5 +1,9 @@
 package konnik.json.parser
 
+import konnik.json.decode.Decoder
+import konnik.json.result.Err
+import konnik.json.result.Result
+
 /* ----------------------------------------------------------------------------
  *
  * PUBLIC INTERFACE
@@ -32,6 +36,12 @@ fun parseJson(input: String): JsonValue? =
             else -> null // it's an error if not all input is consumed
         }
     }
+
+/**
+ * Decodes some JSON using the provided decoder.
+ */
+fun <T> decodeJson(input: String, decoder: Decoder<T>): Result<T> =
+    parseJson(input)?.let(decoder) ?: Err("Invalid JSON")
 
 
 /* ----------------------------------------------------------------------------
