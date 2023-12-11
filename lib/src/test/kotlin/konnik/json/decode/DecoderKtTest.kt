@@ -165,7 +165,7 @@ class DecoderKtTest {
             val e: List<String>
         )
 
-        val myObjDecoder = map5(
+        val myObjDecoder = map(
             field("a") of int,
             field("b") of double,
             field("c") of str,

@@ -147,7 +147,7 @@ class ParserKtTest {
     }
 
     @Test
-    fun `decodeJson - parse and decode`() {
+    fun `decodeJson - parse and decode a sum type`() {
         val registeredJson = """
             { "type": "registered", 
               "id": 42,
@@ -171,7 +171,7 @@ class ParserKtTest {
                         User::Guest
                     )
 
-                    "registered" -> map4(
+                    "registered" -> map(
                         field("id", int),
                         field("alias", str),
                         field("email", str),

@@ -80,7 +80,7 @@ fun <T> list(itemDecoder: Decoder<T>): Decoder<List<T>> = { jsonValue ->
     when (jsonValue) {
         is JsonValue.Array ->
             jsonValue.items.fold(Ok(emptyList())) { acc, item ->
-                map2(acc, itemDecoder(item)) { a, b -> a + b }
+                map(acc, itemDecoder(item)) { a, b -> a + b }
             }
 
         else -> Err("${jsonValue.str()} is not an array")
@@ -198,7 +198,7 @@ fun <A, B> map(decoder: Decoder<A>, transform: (A) -> B): Decoder<B> = { jsonVal
 /**
  * Combine the results of two decoders using the provided function.
  */
-fun <A, B, R> map2(a: Decoder<A>, b: Decoder<B>, transform: (A, B) -> R): Decoder<R> =
+fun <A, B, R> map(a: Decoder<A>, b: Decoder<B>, transform: (A, B) -> R): Decoder<R> =
     a.andThen { aValue ->
         b.map { bValue -> transform(aValue, bValue) }
     }
@@ -206,20 +206,20 @@ fun <A, B, R> map2(a: Decoder<A>, b: Decoder<B>, transform: (A, B) -> R): Decode
 /**
  * Combine the results of three decoders.
  */
-fun <A, B, C, R> map3(a: Decoder<A>, b: Decoder<B>, c: Decoder<C>, transform: (A, B, C) -> R): Decoder<R> =
-    a.andThen { aValue -> map2(b, c) { bValue, cValue -> transform(aValue, bValue, cValue) } }
+fun <A, B, C, R> map(a: Decoder<A>, b: Decoder<B>, c: Decoder<C>, transform: (A, B, C) -> R): Decoder<R> =
+    a.andThen { aValue -> map(b, c) { bValue, cValue -> transform(aValue, bValue, cValue) } }
 
 /**
  * Combine the results of four decoders.
  */
-fun <A, B, C, D, R> map4(
+fun <A, B, C, D, R> map(
     a: Decoder<A>,
     b: Decoder<B>,
     c: Decoder<C>,
     d: Decoder<D>,
     transform: (A, B, C, D) -> R
 ): Decoder<R> =
-    a.andThen { aValue -> map3(b, c, d) { bValue, cValue, dValue -> transform(aValue, bValue, cValue, dValue) } }
+    a.andThen { aValue -> map(b, c, d) { bValue, cValue, dValue -> transform(aValue, bValue, cValue, dValue) } }
 
 /**
  * Combine the results of five decoders.
@@ -227,7 +227,7 @@ fun <A, B, C, D, R> map4(
  * Note: if you need to combine more than five decoders you can
  * always use [andThen].
  */
-fun <A, B, C, D, E, R> map5(
+fun <A, B, C, D, E, R> map(
     a: Decoder<A>,
     b: Decoder<B>,
     c: Decoder<C>,
@@ -236,7 +236,7 @@ fun <A, B, C, D, E, R> map5(
     transform: (A, B, C, D, E) -> R
 ): Decoder<R> =
     a.andThen { aValue ->
-        map4(b, c, d, e) { bValue, cValue, dValue, eValue ->
+        map(b, c, d, e) { bValue, cValue, dValue, eValue ->
             transform(aValue, bValue, cValue, dValue, eValue)
         }
     }
@@ -259,7 +259,7 @@ fun <A, B> Decoder<A>.andThen(aToDecoderB: (A) -> Decoder<B>): Decoder<B> = { js
  */
 fun <T> List<Decoder<T>>.combine(): Decoder<List<T>> =
     this.fold(succeed(emptyList())) { acc, item ->
-        map2(acc, item) { a, b ->
+        map(acc, item) { a, b ->
             a + b
         }
     }

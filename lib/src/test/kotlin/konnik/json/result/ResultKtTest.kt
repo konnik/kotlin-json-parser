@@ -16,9 +16,9 @@ class ResultKtTest {
         val err1: Result<Int> = Err("error1")
         val err2: Result<Int> = Err("error2")
 
-        assertEquals(Ok(42), map2(Ok(12), Ok(30)) { a, b -> a + b })
-        assertEquals(err1, map2(err1, Ok(30)) { a, b -> a + b })
-        assertEquals(err2, map2(Ok(12), err2) { a, b -> a + b })
+        assertEquals(Ok(42), map(Ok(12), Ok(30)) { a, b -> a + b })
+        assertEquals(err1, map(err1, Ok(30)) { a, b -> a + b })
+        assertEquals(err2, map(Ok(12), err2) { a, b -> a + b })
     }
 
     @Test
@@ -27,11 +27,11 @@ class ResultKtTest {
         val err2: Result<Int> = Err("error2")
         val err3: Result<Int> = Err("error3")
 
-        assertEquals(Ok(42), map3(Ok(12), Ok(10), Ok(20)) { a, b, c -> a + b + c })
-        assertEquals(err1, map3(err1, Ok(10), Ok(20)) { a, b, c -> a + b + c })
-        assertEquals(err2, map3(Ok(12), err2, Ok(20)) { a, b, c -> a + b + c })
-        assertEquals(err3, map3(Ok(12), Ok(10), err3) { a, b, c -> a + b + c })
-        assertEquals(err1, map3(err1, err2, err3) { a, b, c -> a + b + c })
+        assertEquals(Ok(42), map(Ok(12), Ok(10), Ok(20)) { a, b, c -> a + b + c })
+        assertEquals(err1, map(err1, Ok(10), Ok(20)) { a, b, c -> a + b + c })
+        assertEquals(err2, map(Ok(12), err2, Ok(20)) { a, b, c -> a + b + c })
+        assertEquals(err3, map(Ok(12), Ok(10), err3) { a, b, c -> a + b + c })
+        assertEquals(err1, map(err1, err2, err3) { a, b, c -> a + b + c })
     }
 
     @Test
