@@ -167,15 +167,15 @@ class ParserKtTest {
             field("type", str).andThen { type ->
                 when (type) {
                     "guest" -> map(
-                        field("displayName", str),
+                        field("displayName") of str,
                         User::Guest
                     )
 
                     "registered" -> map(
-                        field("id", int),
-                        field("alias", str),
-                        field("email", str),
-                        field("phone", nullable(str)),
+                        field("id") of int,
+                        field("alias") of str,
+                        field("email") of str,
+                        field("phone") of nullable(str),
                         User::Registered
                     )
 
@@ -184,7 +184,9 @@ class ParserKtTest {
             }
 
         val guest = decodeJson(guestJson, userDecoder)
+        println(guest)
         val registered = decodeJson(registeredJson, userDecoder)
+        println(registered)
 
         assertEquals(Ok(User.Guest("Guest123")), guest)
         assertEquals(Ok(User.Registered(42, "mrsmith", "mrsmith@example.com", null)), registered)
