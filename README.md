@@ -53,7 +53,6 @@ Guest:
 Registered user:
 
 ```json
-// registeredJson
 {
   "type": "registered",
   "id": 42,
