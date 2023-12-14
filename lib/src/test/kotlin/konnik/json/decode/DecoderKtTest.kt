@@ -136,6 +136,36 @@ class DecoderKtTest {
 
 
     @Test
+    fun `index - decode a value in array based on its index`() {
+        val arr = JsonValue.Array(
+            listOf(JsonValue.Num(1.0), JsonValue.Str("apa"), JsonValue.Bool(true))
+        )
+
+
+        assertEquals(Ok(1), index(0, int)(arr))
+        assertEquals(Ok("apa"), index(1, str)(arr))
+        assertEquals(Ok(true), index(2, bool)(arr))
+        assertEquals(Err("true is not an integer"), index(2, int)(arr))
+        assertEquals(Err("-1 is not a valid index in array"), index(-1, int)(arr))
+        assertEquals(Err("3 is not a valid index in array"), index(3, int)(arr))
+
+        assertEquals(Err("true is not an array"), index(0, int)(JsonValue.Bool(true)))
+        assertEquals(Err("true is not an array"), index(0, int)(JsonValue.Bool(true)))
+
+    }
+
+    @Test
+    fun `index of - infix version of index`() {
+        val arr = JsonValue.Array(
+            listOf(JsonValue.Num(1.0), JsonValue.Str("apa"), JsonValue.Bool(true))
+        )
+
+        assertEquals(Ok(1), (index(0) of int)(arr))
+        assertEquals(Ok("apa"), (index(1) of str)(arr))
+        assertEquals(Ok(true), (index(2) of bool)(arr))
+    }
+
+    @Test
     fun `succeed - always succeed`() {
         assertEquals(Ok("ok"), succeed("ok")(JsonValue.Null))
     }

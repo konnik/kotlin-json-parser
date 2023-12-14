@@ -159,6 +159,42 @@ fun <T : Any> at(path: List<String>, decoder: Decoder<T>): Decoder<T> = { jsonVa
 }
 
 /**
+ * Decodes the value with a particular index in an array.
+ */
+fun <T> index(idx: Int, decoder: Decoder<T>): Decoder<T> = { jsonValue ->
+    when (jsonValue) {
+        is JsonValue.Array -> jsonValue.items.getOrNull(idx)
+            ?.let { decoder(it) }
+            ?: Err("$idx is not a valid index in array")
+
+        else -> Err("${jsonValue.str()} is not an array")
+    }
+}
+
+/**
+ * Represents a value at a specific index in an array before an associated decoder has been chosen for the value.
+ * This interface provides the infix operator [of] to construct the final decoder.
+ *
+ * For example:
+ * ```
+ * val firstValue = index(0) of str
+ * ```
+ */
+data class IndexOf(private val idx: Int) {
+    /**
+     * Returns a decoder to decode the value for the selected field.
+     */
+    infix fun <T> of(decoder: Decoder<T>): Decoder<T> = index(idx, decoder)
+}
+
+
+/**
+ * Selects a particular index in an array.
+ */
+fun index(idx: Int): IndexOf = IndexOf(idx)
+
+
+/**
  * A decoder that just returns the [JsonValue] without decoding it.
  */
 val value: Decoder<JsonValue> = { jsonValue -> Ok(jsonValue) }
