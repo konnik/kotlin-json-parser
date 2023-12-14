@@ -89,6 +89,12 @@ fun <T> list(itemDecoder: Decoder<T>): Decoder<List<T>> = { jsonValue ->
 
 /**
  * Represents a list without an item decoder.
+ * This interface provides the infix operator [of] to construct the final decoder.
+ *
+ * For example:
+ * ```
+ * val gradesDecoder = list of int
+ * ```
  */
 interface ListOf {
     /**
@@ -120,7 +126,13 @@ fun <T> field(fieldName: String, fieldDecoder: Decoder<T>): Decoder<T> =
     }
 
 /**
- * Represents a selected field without a decoder.
+ * Represents a selected field without an associated decoder for the field value.
+ * This interface provides the infix operator [of] to construct the final decoder.
+ *
+ * For example:
+ * ```
+ * val emailDecoder = field("email") of nullable(str)
+ * ```
  */
 data class FieldOf(val name: String) {
     /**

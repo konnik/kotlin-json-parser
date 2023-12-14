@@ -75,7 +75,7 @@ One way to define a decoder for `User` objects would be like this:
 
 ```kotlin
 val userDecoder: Decoder<User> =
-    field("type", str).andThen { type ->
+    (field("type") of str).andThen { type ->
         when (type) {
             "guest" -> map(
                 field("displayName") of str,
