@@ -62,16 +62,23 @@ Registered user:
 }
 ```
 
-Let's say we want to decode users into the following data structure:
+Let's say we want to decode guests and registered users into the following data structure:
 
 ```kotlin
 sealed interface User {
-    data class Guest(val displayName: String) : User
-    data class Registered(val id: Int, val alias: String, val email: String, val phone: String?) : User
+    data class Guest(
+        val displayName: String
+    ) : User
+    data class Registered(
+        val id: Int,
+        val alias: String,
+        val email: String,
+        val phone: String?
+    ) : User
 }
 ```
 
-One way to define a decoder for `User` objects would be like this:
+First we need to define a `Decoder` for `User` objects like this:
 
 ```kotlin
 val userDecoder: Decoder<User> =
@@ -95,7 +102,7 @@ val userDecoder: Decoder<User> =
     }
 ```
 
-This decoder can now be used to parse and decode the users using the `decodeJson` function:
+We can now use `userDecoder` to parse and decode the JSON data using the `decodeJson` function:
 
 ```kotlin
 val guest = decodeJson(guestJson, userDecoder)
