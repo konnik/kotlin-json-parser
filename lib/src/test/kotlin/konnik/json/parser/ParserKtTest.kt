@@ -3,6 +3,7 @@
  */
 package konnik.json.parser
 
+import konnik.json.JsonValue
 import konnik.json.decode.*
 import konnik.json.result.Ok
 import kotlin.test.Test

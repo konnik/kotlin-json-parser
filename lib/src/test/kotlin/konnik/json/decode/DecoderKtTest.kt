@@ -1,6 +1,6 @@
 package konnik.json.decode
 
-import konnik.json.parser.JsonValue
+import konnik.json.JsonValue
 import konnik.json.result.Err
 import konnik.json.result.Ok
 import org.junit.jupiter.api.Test
