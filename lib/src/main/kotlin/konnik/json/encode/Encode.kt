@@ -2,6 +2,46 @@ package konnik.json.encode
 
 import konnik.json.JsonValue
 
+/**
+ * Encodes a [JsonValue] as JSON string.
+ */
+fun encodeJson(json: JsonValue): String =
+    when (json) {
+        is JsonValue.Null -> "null"
+        is JsonValue.Bool -> if (json.value) "true" else "false"
+        is JsonValue.Num -> json.value.toString()
+        is JsonValue.Str -> "\"${escapeJsonString(json.value)}\""
+        is JsonValue.Array -> json.items.joinToString(
+            prefix = "[",
+            separator = ",",
+            postfix = "]",
+            transform = ::encodeJson
+        )
+
+        is JsonValue.Object -> json.members.entries.joinToString(
+            prefix = "{", separator = ",", postfix = "}"
+        ) { (key, value) ->
+            "\"${escapeJsonString(key)}\":${encodeJson(value)}"
+        }
+    }
+
+private fun escapeJsonString(value: String): String {
+    val sb = StringBuilder()
+    value.forEach {
+        when (it) {
+            '"' -> sb.append("\\$it")
+            '\\' -> sb.append("\\$it")
+            '\b' -> sb.append("\\b")
+            '\u000C' -> sb.append("\\f")
+            '\n' -> sb.append("\\n")
+            '\r' -> sb.append("\\r")
+            '\t' -> sb.append("\\t")
+            else -> sb.append(it)
+        }
+    }
+    return sb.toString()
+}
+
 // Basic functions for encoding native Kotlin types into JsonValue's.
 
 /**
